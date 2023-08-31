@@ -1,0 +1,78 @@
+<h2>Carts</h2>
+<table class="table table-bordered">
+    <thead class="thead-dark">
+        <tr>
+            <th>Carrito de: {{user.first_name}}</th>
+            <th>Producto ID</th>
+            <th>Title</th>
+            <th>Quantity</th>
+            <th>Eliminar</th>
+        </tr>
+    </thead>
+    <tbody>
+        {{#each carts}}
+        <tr>
+            <td>{{this._id}}</td>
+            <td colspan="4"></td> 
+            <td>
+                <button class="btn btn-danger" onclick="deleteCart('{{this._id}}')">Eliminar carrito</button>
+            </td>
+        </tr>
+            {{#each this.products}}
+            <tr>
+                <td></td> 
+                <td>{{this._id}}</td>
+                <td>{{this.title}}</td>
+                <td>{{this.quantity}}</td>
+                <td>
+                    <button class="btn btn-danger" onclick="deleteProduct('{{../_id}}', '{{this._id}}')">Eliminar Producto</button>
+                </td>
+            </tr>
+            {{/each}}
+        {{/each}}
+    </tbody>
+</table>
+
+<script>
+    const url = "/api/carts"
+    function createCart() {
+        fetch("/api/carts", {
+            method: "POST"
+        })
+        window.location.href = url;
+    }
+    function deleteCart(cartId) {
+            console.log("Eliminar carrito con ID:", cartId);
+        fetch(`/api/carts/${cartId}`, {
+            method: "DELETE"
+        })
+        .then(response => {
+            if (response.ok) {
+                console.log("Carrito eliminado correctamente");
+            } else {
+                console.error("Error al eliminar el carrito:", response.statusText);
+            }
+        })
+        .catch(error => {
+            console.error("Error al eliminar el carrito:", error);
+        });
+        window.location.href = url;
+    }
+    function deleteProduct(cartId, productId) {
+            console.log("Eliminar producto con ID:", productId);
+        fetch(`/api/carts/${cartId}/products/${productId}`, {
+            method: "DELETE"
+        })
+        .then(response => {
+            if (response.ok) {
+                console.log("Producto eliminado correctamente");
+            } else {
+                console.error("Error al eliminar el producto:", response.statusText);
+            }
+        })
+        .catch(error => {
+            console.error("Error al eliminar el producto:", error);
+        });
+        window.location.href = url;
+    }
+</script>

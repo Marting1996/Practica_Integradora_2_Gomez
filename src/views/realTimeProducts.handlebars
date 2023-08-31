@@ -1,0 +1,119 @@
+<h2>Products Real Time</h2>
+
+<body>
+    <div class="container mt-5">
+        <h2>Products Real Time</h2>
+
+        <form id="form" action="/realtimeproducts" method="POST" class="mt-4">
+            <div class="mb-3">
+                <label for="title" class="form-label">Title:</label>
+                <input type="text" class="form-control" id="title" name="title" required>
+            </div>
+            <div class="mb-3">
+                <label for="description" class="form-label">Description:</label>
+                <input type="text" class="form-control" id="description" name="description" required>
+            </div>
+            <div class="mb-3">
+                <label for="code" class="form-label">Code:</label>
+                <input type="text" class="form-control" id="code" name="code" required>
+            </div>
+            <div class="mb-3">
+                <label for="price" class="form-label">Price:</label>
+                <input type="number" class="form-control" id="price" name="price" required>
+            </div>
+            <div class="mb-3">
+                <label for="stock" class="form-label">Stock:</label>
+                <input type="number" class="form-control" id="stock" name="stock" required>
+            </div>
+            <div class="mb-3">
+                <label for="category" class="form-label">Category:</label>
+                <input type="text" class="form-control" id="category" name="category" required>
+            </div>
+            <div class="mb-3">
+                <label for="thumbnail" class="form-label">Thumbnail:</label>
+                <input type="text" class="form-control" id="thumbnail" name="thumbnail" required>
+            </div>
+            <button type="submit" class="btn btn-primary">Enviar</button>
+        </form>
+
+        <hr>
+
+        <table class="table table-bordered">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Title</th>
+                    <th>Description</th>
+                    <th>Price</th>
+                    <th>Actions</th> 
+                </tr>
+            </thead>
+            <tbody id="tbody">
+                {{#each products}}
+                <tr>
+                    <td>{{this._id}}</td>
+                    <td>{{this.title}}</td>
+                    <td>{{this.description}}</td>
+                    <td>{{this.price}}</td>
+                    <td>
+                        <button onclick="deleteProduct(this)" class="btn btn-danger" data-id="{{this._id}}">Delete</button> 
+                    </td>
+                </tr>
+                {{/each}}
+            </tbody>
+        </table>
+    </div>
+
+</body>
+<script src="/socket.io/socket.io.js"></script>
+
+<script>
+    const socket = io()
+
+    document.getElementById("form").addEventListener("submit", e => {
+        e.preventDefault();
+
+        if (document.getElementById("form").checkValidity()) {
+            const title = document.getElementById("title").value;
+            const description = document.getElementById("description").value;
+            const code = document.getElementById("code").value;
+            const price = parseFloat(document.getElementById("price").value);
+            const stock = parseInt(document.getElementById("stock").value);
+            const category = document.getElementById("category").value;
+            const thumbnail = document.getElementById("thumbnail").value;
+
+            const product = { title, description, price, thumbnail, code, stock, category };
+            socket.emit("new-product", product);
+
+            document.getElementById("form").reset();
+        } else {
+            document.getElementById("form").reportValidity();
+        }
+    });
+    function deleteProduct(button) {
+    const confirmation = confirm("¿Estás seguro de que quieres eliminar este producto?");
+    if (confirmation) {
+        const productId = button.getAttribute("data-id");
+        socket.emit("delete-product", productId);
+    }
+}
+
+socket.on("reload-table", products_realtime => {
+    console.log(products_realtime) 
+    const tbody = document.getElementById("tbody")
+
+    let html = ''
+    products_realtime.forEach(product => {
+        html += `<tr>
+            <td>${product._id}</td>
+            <td>${product.description}</td>
+            <td>${product.price}</td>
+            <td>
+                <button onclick="deleteProduct(this)" data-id="${product._id}">Delete</button> 
+            </td>
+        </tr>`
+    })
+    tbody.innerHTML = html
+})
+
+</script>

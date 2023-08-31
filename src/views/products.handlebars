@@ -1,0 +1,35 @@
+<h2>Product</h2>
+<hr>
+<head>
+    <title>Detalles del Producto</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+
+        .product-details {
+            border: 1px solid #ccc;
+            padding: 20px;
+            max-width: 400px;
+            margin: 0 auto;
+        }
+
+        .product-image {
+            max-width: 100%;
+            height: auto;
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="product-details">
+        <h2>{{product.title}}</h2>
+        <p>{{product.description}}</p>
+        <p>Código: {{product.code}}</p>
+        <p>Precio: {{product.price}}</p>
+        <p>Stock: {{product.stock}}</p>
+        <p>Categoría: {{product.category}}</p>
+        {{!-- <img src="{{product.thumbnail}}" alt="{{product.title}}"> --}}
+    </div>
+</body>

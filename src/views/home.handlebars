@@ -1,0 +1,156 @@
+<body>
+    <div class="container mt-5">
+        <h2>Products</h2>
+
+        <form id="form" class="mb-4">
+            <div class="row">
+                <div class="col-md-2 mb-2">
+                    <label for="query-limit" class="form-label">Limit:</label>
+                    <input type="number" class="form-control" id="query-limit" value="{{limit}}">
+                </div>
+                <div class="col-md-2 mb-2">
+                    <label for="page-limit" class="form-label">Page:</label>
+                    <input type="number" class="form-control" id="page-limit" value="{{page}}">
+                </div>
+                <div class="col-md-3 mb-2">
+                    <label for="query-category" class="form-label">Category:</label>
+                    <select class="form-select" id="query-category">
+                        <option value="">All Categories</option>
+                        <option value="frutas" {{#if categoryEquals }}selected{{/if}}>Frutas</option>
+                        <option value="verduras" {{#if categoryEquals }}selected{{/if}}>Verduras</option>
+                    </select>
+                </div>
+                <div class="col-md-3 mb-2">
+                    <label for="query-sort" class="form-label">Sort by:</label>
+                    <select class="form-select" id="query-sort">
+                        <option value="">None</option>
+                        <option value="price" {{#if sortEquals }}selected{{/if}}>Price</option>
+                    </select>
+                </div>
+                <div class="col-md-2 mb-2">
+                    <button type="submit" class="btn btn-primary">Load</button>
+                </div>
+            </div>
+        </form>
+
+        <table class="table table-bordered">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Title</th>
+                    <th>Description</th>
+                    <th>Price</th>
+                    <th>Cantidad</th>
+                    <th>ID del carrito</th>
+                    <th>Ver Producto</th>
+                </tr>
+            </thead>
+            <tbody>
+                {{#each docs}}
+                <tr>
+                    <td>{{this._id}}</td>
+                    <td>{{this.title}}</td>
+                    <td>{{this.description}}</td>
+                    <td>{{this.price}}</td>
+                    <td>
+                        <input type="text" class="form-control" id="cartId_{{this._id}}" placeholder="ID del carrito">
+                    </td>
+                    <td>
+                        <button onclick="addToCart('{{this._id}}')" class="btn btn-success">Add to Cart</button>
+                    </td>
+                    <td>
+                        <button onclick="getProduct('{{this._id}}')" class="btn btn-info">Get product</button>
+                    </td>
+                </tr>
+                {{/each}}
+            </tbody>
+        </table>
+        <div class="pagination">
+            {{#if hasPrevPage }}
+            <a href="/api/products{{prevLink}}" class="btn btn-secondary">Anteriot</a>
+            {{/if}}
+            {{#if hasNextPage }}
+            <a href="/api/products{{nextLink}}" class="btn btn-secondary">Siguiente</a>
+            {{/if}}
+        </div>
+    </div>
+</body>
+<script>
+    document.getElementById("form").onsubmit = (e) => {
+        e.preventDefault();
+        const limit = document.getElementById("query-limit").value;
+        const page = document.getElementById("page-limit").value;
+        const category = document.getElementById("query-category").value;
+        const sort = document.getElementById("query-sort").value;
+
+        let url = `/api/products?limit=${limit}&page=${page}`;
+        if (category) {
+            url += `&category=${category}`;
+        }
+        if (sort) {
+            url += `&sort=${sort}`;
+        }
+
+        window.location.href = url;
+
+    }
+</script>
+
+<script>
+    async function addToCart(pid) {
+        const cartId = document.getElementById(`cartId_${pid}`).value; 
+
+        if (!cartId) {
+            console.error("Debes proporcionar el ID del carrito.");
+            return;
+        }
+
+        fetch(`/api/carts/${cartId}/product/${pid}`, {
+            method: "GET"
+        })
+        .then(response => {
+            if (response.ok) {
+                console.log("Producto agregado al carrito correctamente");
+            } else {
+                console.error("Error al agregar el producto al carrito:");
+            }
+        })
+        .catch(error => {
+            console.error("Error al agregar el producto al carrito:", error);
+        });
+    }
+</script>
+
+<script>
+    async function createCart() {
+        fetch("/api/carts", {
+            method: "POST"
+        })
+        .then(response => {
+            if (response.ok) {
+                console.log("Carrito creado correctamente");
+                return response.json(); 
+            } else {
+                console.error("Error al crear el carrito:");
+            }
+        })
+        .then(data => {
+            console.log("Datos de los carritos:", data);
+        })
+        .catch(error => {
+            console.error("Error al crear el carrito:", error);
+        });
+    }
+</script>
+<script>
+    async function getProduct(pid) {
+        const productId = pid;
+
+        if (!productId) {
+            console.error("Debes proporcionar el ID del producto.");
+            return;
+        }
+
+        window.location.href = `/api/products/${productId}`;
+    }
+</script>
